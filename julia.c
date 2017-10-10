@@ -59,10 +59,9 @@ int main(int argc, char**argv)
     int i, j;
 #pragma offload target(mic)\
     out(julia_counts: length(n*n) alloc_if(1) free_if(0))
-    #pragma omp parallel for
+    #pragma omp parallel for collapse(2)
     {
     for (i = 0; i < n; ++i){
-	#pragma omp parallel for 
         for (j = 0; j < n; ++j){
             double x = -1.0 + (double)i*(2.0/(n-1)) ;
             double y = -1.0 + (double)j*(2.0/(n-1)) ;
