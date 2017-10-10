@@ -8,11 +8,11 @@
 /* ~~~~~~~~~~ PARAMETERS TO PLAY AROUND WITH ~~~~~~~~~~*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /* This determines the color distribution of the Julia Set */
-static const double window = 3.0; /* keep in the range of 1...10*/
+static const double window = 5.0; /* keep in the range of 1...10*/
 
 /* These determine the shape of the Julia Set */
-static const double re_c = -0.46; /* keep in the range of (-1,1)*/
-static const double im_c = 0.58;  /* keep in the range of (-1,1)*/
+static const double re_c = -0.75; /* keep in the range of (-1,1)*/
+static const double im_c = 0.75;  /* keep in the range of (-1,1)*/
 
 
 /* Julia Loop Logic: Don't touch unless you understand what to do! */
@@ -36,6 +36,7 @@ uint8_t julia_loop(double x, double y)
 
 int main(int argc, char**argv)
 {
+
     /* Default Size of Image is 500 x 500 pixels */
     int n = argc > 1 ? atoi(argv[1]) : 500;
     if (argc > 2) {
@@ -50,12 +51,19 @@ int main(int argc, char**argv)
     /* ~~~~~~~~~~~~ PARALLELIZE AND OFFLOAD ME ~~~~~~~~~~~~*/
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
     /* Main Computational Loop */
-    for (int i = 0; i < n; ++i){ 
-        for (int j = 0; j < n; ++j){
+
+    int i, j;
+#pragma offload target(mic)\
+    out(julia_counts: length(n*n) alloc_if(1) free_if(0))
+    #pragma omp parallel for private(i,j) 
+    {
+    for (i = 0; i < n; ++i){ 
+        for (j = 0; j < n; ++j){
             double x = -1.0 + (double)i*(2.0/(n-1)) ;
             double y = -1.0 + (double)j*(2.0/(n-1)) ;
             julia_counts[i + j*n] = julia_loop(x, y);
         }
+    }
     }
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
     /* ~~~~~~~~~~~~ PARALLELIZE AND OFFLOAD ME ~~~~~~~~~~~~*/
@@ -68,7 +76,7 @@ int main(int argc, char**argv)
         for (int j = 0; j < n; ++j)
             fprintf(fid, "%d\n", julia_counts[i + j*n]);
     fclose(fid);
-
+    
     return 1;
 
 }

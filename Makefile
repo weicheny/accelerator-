@@ -1,7 +1,7 @@
 all: julia image
 
 julia:
-	$(CC) -o julia julia.c
+	$(CC) -std=c99 -o julia julia.c
 
 julia-xeonphi:
 	icc -axMIC-AVX512,CORE-AVX2 -offload-attribute-target=mic -qopenmp -o julia julia.c
