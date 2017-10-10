@@ -1,5 +1,0 @@
-
-Due to MODULEPATH changes, the following have been reloaded:
-  1) cmake/3.9.0     2) curl/7.54.0
-
-Generating 5000 x 5000 Julia Set Data
